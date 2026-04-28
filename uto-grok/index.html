@@ -1022,5 +1022,24 @@ navLinks.forEach(l=>l.addEventListener('click',()=>{
   document.querySelector('.overlay').classList.remove('show');
 }));
 </script>
+<!-- 방문자 추적 -->
+<script>
+(function() {
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbw-culiFFnHaYW5Dai7IhLlPAu1lFXfHpo7Erg-TqboitlrWrpIUc6aqNtJyR3RGHlp/exec';
+  function getUTM(p) { return new URL(window.location.href).searchParams.get(p) || ''; }
+  if (sessionStorage.getItem('uto_grok_logged')) return;
+  sessionStorage.setItem('uto_grok_logged', '1');
+  var payload = JSON.stringify({
+    referrer: document.referrer || '',
+    userAgent: navigator.userAgent || '',
+    utm_source: getUTM('utm_source'),
+    utm_medium: getUTM('utm_medium'),
+    utm_campaign: getUTM('utm_campaign'),
+    pageUrl: window.location.href
+  });
+  if (navigator.sendBeacon) { navigator.sendBeacon(GAS_URL, payload); }
+  else { fetch(GAS_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:payload }).catch(function(){}); }
+})();
+</script>
 </body>
 </html>
