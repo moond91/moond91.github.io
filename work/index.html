@@ -16,22 +16,10 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Pretendard', sans-serif; background: #f5f5f5; }
-  :root {
-    --text-primary: #1a1a1a;
-    --text-secondary: #888;
-    --card-bg: #ffffff;
-    --input-bg: #fafafa;
-    --border-color: #e5e5e5;
-  }
+  :root { --text-primary: #1a1a1a; --text-secondary: #888; --card-bg: #ffffff; --input-bg: #fafafa; --border-color: #e5e5e5; }
   @media (prefers-color-scheme: dark) {
     body { background: #1a1a1a; }
-    :root {
-      --text-primary: #e5e5e5;
-      --text-secondary: #999;
-      --card-bg: #2a2a2a;
-      --input-bg: #333;
-      --border-color: #444;
-    }
+    :root { --text-primary: #e5e5e5; --text-secondary: #999; --card-bg: #2a2a2a; --input-bg: #333; --border-color: #444; }
   }
 </style>
 </head>
@@ -41,12 +29,13 @@
 const { useState, useCallback } = React;
 
 var SCRIPTS = [
-  { id: 1, label: "\uB300\uBCF8 1", target: 15000, tolerance: 2000 },
-  { id: 2, label: "\uB300\uBCF8 2", target: 20000, tolerance: 2000 },
-  { id: 3, label: "\uB300\uBCF8 3", target: 25000, tolerance: 2000 },
+  { id: 1, label: "\uB300\uBCF8 1", target: 15000, tolerance: 2000, overMax: 5000 },
+  { id: 2, label: "\uB300\uBCF8 2", target: 20000, tolerance: 2000, overMax: 5000 },
+  { id: 3, label: "\uB300\uBCF8 3", target: 25000, tolerance: 2000, overMax: null },
 ];
 
-var FORBIDDEN = ["\u26A0\uFE0F", "\uCD9C\uCC98:", "\u26A0\uFE0F \uBD88\uD655\uC2E4:"];
+/* ===== \uC815\uBCF4 \uCE74\uD14C\uACE0\uB9AC ===== */
+var INFO_FORBIDDEN = ["\u26A0\uFE0F", "\uCD9C\uCC98:", "\u26A0\uFE0F \uBD88\uD655\uC2E4:"];
 
 function hasAICopyTrace(text) {
   var variants = [
@@ -57,22 +46,7 @@ function hasAICopyTrace(text) {
   return variants.some(function(v) { return text.includes(v); });
 }
 
-var CTA_KEYWORDS = [
-  "\uAD6C\uB3C5", "\uC88B\uC544\uC694", "\uC54C\uB9BC", "\uB313\uAE00",
-  "\uC88B\uC544\uC694\uC640 \uAD6C\uB3C5", "\uAD6C\uB3C5\uACFC \uC88B\uC544\uC694",
-  "\uC88B\uC544\uC694 \uBC84\uD2BC", "\uAD6C\uB3C5 \uBC84\uD2BC",
-  "\uC54C\uB9BC \uC124\uC815", "\uAD6C\uB3C5\uD574", "\uC88B\uC544\uC694\uB97C",
-  "\uB20C\uB7EC", "\uC54C\uB824\uC8FC\uC138\uC694", "\uB0A8\uACE8\uC8FC\uC138\uC694",
-  "\uC751\uC6D0", "\uCC44\uB110",
-];
-
-var META_FIELDS = [
-  { key: "\uC8FC\uC81C", patterns: ["\uC8FC\uC81C"] },
-  { key: "\uB3C4\uC785\uC720\uD615", patterns: ["\uB3C4\uC785 \uC720\uD615", "\uB3C4\uC785\uC720\uD615"] },
-  { key: "\uAD6C\uC131\uC21C\uC11C", patterns: ["\uAD6C\uAC04 \uAD6C\uC131", "\uAD6C\uAC04\uAD6C\uC131", "\uAD6C\uC131\uC21C\uC11C", "\uAD6C\uC131 \uC21C\uC11C", "\uBC30\uC5F4"] },
-];
-
-var H_TYPES = [
+var INFO_H_TYPES = [
   { code: "H1", names: ["\uC190\uD574 \uAE08\uC561 \uD504\uB808\uC784", "\uC190\uD574 \uAE08\uC561", "\uC190\uD574\uAE08\uC561"] },
   { code: "H2", names: ["\uC704\uD5D8 \uC2E0\uD638 \uB098\uC5F4", "\uC704\uD5D8 \uC2E0\uD638", "\uC704\uD5D8\uC2E0\uD638"] },
   { code: "H3", names: ["\uB300\uD45C \uC2E4\uC218 \uC0C1\uD669", "\uC2E4\uC218 \uC0C1\uD669 \uBB18\uC0AC", "\uB300\uD45C \uC2E4\uC218", "\uC2E4\uC218 \uC0C1\uD669"] },
@@ -83,7 +57,7 @@ var H_TYPES = [
   { code: "H8", names: ["Before/After", "before/after", "\uBE44\uD3EC\uC560\uD504\uD130", "\uC804\uD6C4 \uB300\uBE44", "\uC804/\uD6C4"] },
 ];
 
-var C_TYPES = [
+var INFO_C_TYPES = [
   { code: "C1", names: ["\uC190\uD574 \uD568\uC815", "\uC190\uD574\uD568\uC815"] },
   { code: "C2", names: ["\uAE30\uC900 \uC22B\uC790", "\uAE30\uC900\uC22B\uC790"] },
   { code: "C3", names: ["\uD754\uD55C \uCC29\uAC01", "\uD754\uD55C\uCC29\uAC01"] },
@@ -97,6 +71,45 @@ var C_TYPES = [
   { code: "C11", names: ["\uAE08\uC561 \uC2DC\uBBAC\uB808\uC774\uC158", "\uAE08\uC561\uC2DC\uBBAC\uB808\uC774\uC158", "\uC2DC\uBBAC\uB808\uC774\uC158", "\uAC00\uC0C1 \uC778\uBB3C"] },
   { code: "C12", names: ["\uC2E4\uBB34 \uD301", "\uC2E4\uBB34\uD301", "\uC2E4\uC6A9 \uC815\uBCF4"] },
 ];
+
+/* ===== \uC5ED\uC0AC \uCE74\uD14C\uACE0\uB9AC ===== */
+var HIST_H_TYPES = [
+  { code: "A", names: ["\uC7A5\uBA74 \uBB18\uC0AC\uD615", "\uC7A5\uBA74 \uBB18\uC0AC", "\uC7A5\uBA74\uBB18\uC0AC"] },
+  { code: "B", names: ["\uC2E4\uB85D/\uAE30\uB85D \uC778\uC6A9\uD615", "\uC2E4\uB85D \uC778\uC6A9", "\uAE30\uB85D \uC778\uC6A9\uD615", "\uC2E4\uB85D\uC778\uC6A9"] },
+  { code: "C", names: ["\uC0C1\uC2DD \uD30C\uAD34\uD615", "\uC0C1\uC2DD \uD30C\uAD34", "\uC0C1\uC2DD\uD30C\uAD34"] },
+  { code: "D", names: ["\uACB0\uB860 \uBA3C\uC800\uD615", "\uACB0\uB860 \uBA3C\uC800", "\uACB0\uB860\uBA3C\uC800"] },
+  { code: "E", names: ["\uC22B\uC790 \uCDA9\uACA9\uD615", "\uC22B\uC790 \uCDA9\uACA9", "\uC22B\uC790\uCDA9\uACA9"] },
+  { code: "F", names: ["\uB300\uBE44/\uBE44\uAD50\uD615", "\uB300\uBE44 \uBE44\uAD50", "\uB300\uBE44/\uBE44\uAD50", "\uB300\uBE44\uBE44\uAD50"] },
+  { code: "G", names: ["\uC778\uBB3C \uB300\uC0AC\uD615", "\uC778\uBB3C \uB300\uC0AC", "\uC778\uBB3C\uB300\uC0AC"] },
+  { code: "H", names: ["\uC9C8\uBB38 \uC9C1\uAD6C\uD615", "\uC9C8\uBB38 \uC9C1\uAD6C", "\uC9C8\uBB38\uC9C1\uAD6C"] },
+];
+
+var HIST_ARR_TYPES = [
+  { code: "A", names: ["\uC2DC\uAC04\uC21C \uC815\uC8FC\uD589", "\uC2DC\uAC04\uC21C", "\uC815\uC8FC\uD589"] },
+  { code: "B", names: ["\uACB0\uB9D0 \uBA3C\uC800", "\uC5ED\uCD94\uC801", "\uACB0\uB9D0\uBA3C\uC800"] },
+  { code: "C", names: ["\uBBF8\uC2A4\uD130\uB9AC \uC218\uC0AC\uD615", "\uBBF8\uC2A4\uD130\uB9AC \uC218\uC0AC", "\uC218\uC0AC\uD615"] },
+  { code: "D", names: ["\uB450 \uCD95 \uAD50\uCC28 \uD3B8\uC9D1", "\uAD50\uCC28 \uD3B8\uC9D1", "\uB450 \uCD95 \uAD50\uCC28", "\uAD50\uCC28\uD3B8\uC9D1"] },
+  { code: "E", names: ["\uB3D9\uC2EC\uC6D0 \uD655\uC7A5\uD615", "\uB3D9\uC2EC\uC6D0 \uD655\uC7A5", "\uB3D9\uC2EC\uC6D0"] },
+  { code: "F", names: ["\uD1B5\uB150 \uD30C\uAD34", "\uC7AC\uAC74", "\uD1B5\uB150 \uD30C\uAD34 \uC7AC\uAC74", "\uD1B5\uB150\uD30C\uAD34"] },
+  { code: "G", names: ["\uAC10\uC815 \uB864\uB7EC\uCF54\uC2A4\uD130", "\uAC10\uC815 \uB864\uB7EC\uCF54\uC2A4\uD130", "\uB864\uB7EC\uCF54\uC2A4\uD130"] },
+  { code: "H", names: ["\uC9C8\uBB38 \uC0AC\uB2E4\uB9AC\uD615", "\uC9C8\uBB38 \uC0AC\uB2E4\uB9AC", "\uC0AC\uB2E4\uB9AC\uD615"] },
+];
+
+/* ===== \uACF5\uD1B5 ===== */
+var CTA_KEYWORDS = [
+  "\uAD6C\uB3C5", "\uC88B\uC544\uC694", "\uC54C\uB9BC", "\uB313\uAE00",
+  "\uC88B\uC544\uC694\uC640 \uAD6C\uB3C5", "\uAD6C\uB3C5\uACFC \uC88B\uC544\uC694",
+  "\uC88B\uC544\uC694 \uBC84\uD2BC", "\uAD6C\uB3C5 \uBC84\uD2BC",
+  "\uC54C\uB9BC \uC124\uC815", "\uAD6C\uB3C5\uD574", "\uC88B\uC544\uC694\uB97C",
+  "\uB20C\uB7EC", "\uC54C\uB824\uC8FC\uC138\uC694", "\uB0A8\uACE8\uC8FC\uC138\uC694",
+  "\uC751\uC6D0", "\uCC44\uB110",
+];
+
+var META_TOPIC = { key: "\uC8FC\uC81C", patterns: ["\uC8FC\uC81C"] };
+var META_INTRO_INFO = { key: "\uB3C4\uC785\uC720\uD615", patterns: ["\uB3C4\uC785 \uC720\uD615", "\uB3C4\uC785\uC720\uD615"] };
+var META_ARR_INFO = { key: "\uAD6C\uC131\uC21C\uC11C", patterns: ["\uAD6C\uAC04 \uAD6C\uC131", "\uAD6C\uAC04\uAD6C\uC131", "\uAD6C\uC131\uC21C\uC11C", "\uAD6C\uC131 \uC21C\uC11C", "\uBC30\uC5F4"] };
+var META_INTRO_HIST = { key: "\uB3C4\uC785\uC720\uD615", patterns: ["\uB3C4\uC785 \uC720\uD615", "\uB3C4\uC785\uC720\uD615", "\uB3C4\uC785\uBD80 \uC720\uD615", "\uB3C4\uC785\uBD80\uC720\uD615"] };
+var META_ARR_HIST = { key: "\uBC30\uC5F4\uC804\uB7B5", patterns: ["\uBC30\uC5F4 \uC804\uB7B5", "\uBC30\uC5F4\uC804\uB7B5", "\uAD6C\uC131\uC21C\uC11C", "\uAD6C\uC131 \uC21C\uC11C", "\uAD6C\uAC04 \uAD6C\uC131"] };
 
 function hasCTA(section) { return CTA_KEYWORDS.some(function(kw) { return section.includes(kw); }); }
 
@@ -113,139 +126,193 @@ function extractMetaValue(headerLines, field) {
   return null;
 }
 
-function extractHTypes(headerText) {
+function extractTypes(headerText, typeList, codeRegex) {
   var found = [];
-  var m = headerText.match(/H[1-8]/g);
+  var m = headerText.match(codeRegex);
   if (m) m.forEach(function(x) { if (found.indexOf(x) === -1) found.push(x); });
-  H_TYPES.forEach(function(t) { if (found.indexOf(t.code) === -1 && t.names.some(function(n) { return headerText.includes(n); })) found.push(t.code); });
+  typeList.forEach(function(t) {
+    if (found.indexOf(t.code) === -1 && t.names.some(function(n) { return headerText.includes(n); })) found.push(t.code);
+  });
   return found;
 }
-function extractCTypes(headerText) {
-  var found = [];
-  var m = headerText.match(/C(?:1[0-2]|[1-9])(?!\d)/g);
-  if (m) m.forEach(function(x) { if (found.indexOf(x) === -1) found.push(x); });
-  C_TYPES.forEach(function(t) { if (found.indexOf(t.code) === -1 && t.names.some(function(n) { return headerText.includes(n); })) found.push(t.code); });
-  return found;
+
+function getLabel(code, typeList) {
+  var t = typeList.find(function(x) { return x.code === code; });
+  return t ? code + ": " + t.names[0] : code;
 }
-function getHLabel(code) { var t = H_TYPES.find(function(h) { return h.code === code; }); return t ? code + ": " + t.names[0] : code; }
-function getCLabel(code) { var t = C_TYPES.find(function(c) { return c.code === code; }); return t ? code + ": " + t.names[0] : code; }
 
 var OLD_DATE = [/20(?:1\d|2[0-4])\uB144\s*(?:\uAE30\uC900|\uD604\uC7AC|\uD604\uD589|\uC801\uC6A9|\uC2DC\uD589)/, /2025\uB144\s*(?:\uAE30\uC900|\uD604\uC7AC|\uD604\uD589|\uC801\uC6A9|\uC2DC\uD589)/];
 var FRESH_DATE = [/2026\uB144/, /\uC62C\uD574/, /\uD604\uC7AC\s*\uAE30\uC900/, /\uCD5C\uC2E0/];
 
-function analyzeScript(text, config) {
+function gwa(n) { return n === 2 ? "\uC640" : "\uACFC"; }
+
+function analyzeScript(text, config, category) {
   var len = text.length;
   var lenNoSpace = text.replace(/\s/g, "").length;
   var min = config.target - config.tolerance;
-  var overLimit = config.target + 5000;
-  var issues = [];      // \uB0B4\uBD80 \uCF54\uB4DC\uC6A9
-  var friendlyIssues = []; // \uC218\uAC15\uC0DD\uC6A9 \uBA54\uC2DC\uC9C0
+  var overLimit = config.overMax ? config.target + config.overMax : null;
+  var issues = [];
+  var friendlyIssues = [];
+  var isInfo = category === "info";
 
+  // \uAE00\uC790\uC218
   if (len < min) {
     issues.push("charShort");
     friendlyIssues.push("\uAE30\uC900 " + config.target.toLocaleString() + "\uC790\uC778\uB370 " + len.toLocaleString() + "\uC790\uB85C \uB098\uC640\uC694~ \uB300\uBCF8 \uB298\uB824\uC8FC\uC138\uC694!");
-  } else if (len > overLimit) {
+  } else if (overLimit && len > overLimit) {
     issues.push("charOver");
     friendlyIssues.push("\uAE30\uC900 " + config.target.toLocaleString() + "\uC790\uC778\uB370 " + len.toLocaleString() + "\uC790\uB85C \uB108\uBB34 \uB9CE\uC544\uC694~ \uC870\uAE08 \uC904\uC5EC\uC8FC\uC138\uC694!");
   }
 
-  var foundForbidden = FORBIDDEN.filter(function(kw) { return text.includes(kw); });
-  if (foundForbidden.length > 0) {
-    issues.push("forbidden");
-    friendlyIssues.push("\uD734\uBA3C\uD130\uCE58 \uC548 \uD558\uC2E0 \uAC8C \uBCF4\uC5EC\uC694~ \uBD88\uD655\uC2E4, \uCD9C\uCC98 \uAE30\uD638 \uCCB4\uD06C\uD574\uC8FC\uC138\uC694!");
+  // \uAE08\uC9C0 \uD0A4\uC6CC\uB4DC (\uC815\uBCF4\uB9CC)
+  if (isInfo) {
+    var foundForbidden = INFO_FORBIDDEN.filter(function(kw) { return text.includes(kw); });
+    if (foundForbidden.length > 0) {
+      issues.push("forbidden");
+      friendlyIssues.push("\uD734\uBA3C\uD130\uCE58 \uC548 \uD558\uC2E0 \uAC8C \uBCF4\uC5EC\uC694~ \uBD88\uD655\uC2E4, \uCD9C\uCC98 \uAE30\uD638 \uCCB4\uD06C\uD574\uC8FC\uC138\uC694!");
+    }
   }
+
+  // AI \uBCF5\uBD99 (\uACF5\uD1B5)
   if (hasAICopyTrace(text)) {
     issues.push("aiCopy");
     friendlyIssues.push("AI \uBCF5\uBD99 \uADF8\uB300\uB85C \uD558\uC2E0 \uBD80\uBD84\uC774 \uC788\uC5B4\uC694~ \uCCB4\uD06C\uD574\uC8FC\uC138\uC694!");
   }
 
+  // \uC0C1\uB2E8 \uBA54\uD0C0
   var headerLines = text.split("\n").slice(0, 20);
   var headerText = headerLines.join("\n");
   var metaPresent = {};
   var metaValues = {};
 
-  metaPresent["\uC8FC\uC81C"] = !!(extractMetaValue(headerLines, META_FIELDS[0]));
-  metaValues["\uC8FC\uC81C"] = extractMetaValue(headerLines, META_FIELDS[0]);
+  // \uC8FC\uC81C
+  var topicVal = extractMetaValue(headerLines, META_TOPIC);
+  metaPresent["\uC8FC\uC81C"] = !!topicVal;
+  metaValues["\uC8FC\uC81C"] = topicVal;
 
-  var hCodes = extractHTypes(headerText);
+  // \uB3C4\uC785\uC720\uD615
+  var introField = isInfo ? META_INTRO_INFO : META_INTRO_HIST;
+  var hTypeList = isInfo ? INFO_H_TYPES : HIST_H_TYPES;
+  var hCodeRegex = isInfo ? /H[1-8]/g : /[A-H](?=[\s::\-\u2013\u2014|,\uFF1A]|$)/g;
+  var hCodes = extractTypes(headerText, hTypeList, hCodeRegex);
+  // \uD5E4\uB354\uC5D0\uC11C \uD0A4\uC6CC\uB4DC\uB85C\uB3C4 \uCCB4\uD06C
+  if (hCodes.length === 0) {
+    var introVal = extractMetaValue(headerLines, introField);
+    if (introVal) {
+      hCodes = extractTypes(introVal, hTypeList, hCodeRegex);
+      if (hCodes.length === 0) hCodes = ["custom:" + introVal];
+    }
+  }
   metaPresent["\uB3C4\uC785\uC720\uD615"] = hCodes.length > 0;
-  metaValues["\uB3C4\uC785\uC720\uD615"] = hCodes.length > 0 ? hCodes.map(getHLabel).join(", ") : null;
+  metaValues["\uB3C4\uC785\uC720\uD615"] = hCodes.length > 0 ? hCodes.map(function(c) { return c.indexOf("custom:") === 0 ? c.slice(7) : getLabel(c, hTypeList); }).join(", ") : null;
 
-  var cCodes = extractCTypes(headerText);
-  metaPresent["\uAD6C\uC131\uC21C\uC11C"] = cCodes.length > 0;
-  metaValues["\uAD6C\uC131\uC21C\uC11C"] = cCodes.length > 0 ? cCodes.map(getCLabel).join(" \u2192 ") : null;
+  // \uAD6C\uC131\uC21C\uC11C / \uBC30\uC5F4\uC804\uB7B5
+  var arrField = isInfo ? META_ARR_INFO : META_ARR_HIST;
+  var arrLabel = isInfo ? "\uAD6C\uC131\uC21C\uC11C" : "\uBC30\uC5F4\uC804\uB7B5";
+  var cTypeList = isInfo ? INFO_C_TYPES : HIST_ARR_TYPES;
+  var cCodeRegex = isInfo ? /C(?:1[0-2]|[1-9])(?!\d)/g : /\uC804\uB7B5\s*[A-H]|[A-H](?=[\s::\.\-])/g;
+  var cCodes = extractTypes(headerText, cTypeList, cCodeRegex);
+  if (cCodes.length === 0) {
+    var arrVal = extractMetaValue(headerLines, arrField);
+    if (arrVal) {
+      cCodes = extractTypes(arrVal, cTypeList, cCodeRegex);
+      if (cCodes.length === 0) cCodes = ["custom:" + arrVal];
+    }
+  }
+  metaPresent[arrLabel] = cCodes.length > 0;
+  metaValues[arrLabel] = cCodes.length > 0 ? cCodes.map(function(c) { return c.indexOf("custom:") === 0 ? c.slice(7) : getLabel(c, cTypeList); }).join(" \u2192 ") : null;
 
-  var missingMeta = META_FIELDS.filter(function(f) { return !metaPresent[f.key]; }).map(function(f) { return f.key; });
+  var metaFields = ["\uC8FC\uC81C", "\uB3C4\uC785\uC720\uD615", arrLabel];
+  var missingMeta = metaFields.filter(function(k) { return !metaPresent[k]; });
   if (missingMeta.length > 0) {
     issues.push("metaMissing");
     friendlyIssues.push("\uC0C1\uB2E8\uC5D0 " + missingMeta.join(", ") + "\uAC00 \uBE60\uC84C\uC5B4\uC694~ \uCD94\uAC00\uD574\uC8FC\uC138\uC694!");
   }
 
-  var hasOldDate = OLD_DATE.some(function(r) { return r.test(text); });
-  var hasFreshDate = FRESH_DATE.some(function(r) { return r.test(text); });
-  if (hasOldDate && !hasFreshDate) {
-    issues.push("oldDate");
-    friendlyIssues.push("2026\uB144 \uCD5C\uC2E0 \uAE30\uC900\uC73C\uB85C \uC5C5\uB370\uC774\uD2B8\uD574\uC8FC\uC138\uC694!");
+  // \uB0A0\uC9DC (\uC815\uBCF4\uB9CC)
+  var hasOldDate = false;
+  var hasFreshDate = false;
+  if (isInfo) {
+    hasOldDate = OLD_DATE.some(function(r) { return r.test(text); });
+    hasFreshDate = FRESH_DATE.some(function(r) { return r.test(text); });
+    if (hasOldDate && !hasFreshDate) {
+      issues.push("oldDate");
+      friendlyIssues.push("2026\uB144 \uCD5C\uC2E0 \uAE30\uC900\uC73C\uB85C \uC5C5\uB370\uC774\uD2B8\uD574\uC8FC\uC138\uC694!");
+    }
   }
 
+  // CTA (\uCC38\uACE0)
   var introEnd = Math.floor(len * 0.2);
   var outroStart = Math.floor(len * 0.8);
+  var hasIntroCTA = hasCTA(text.slice(0, introEnd));
+  var hasOutroCTA = hasCTA(text.slice(outroStart));
 
   return {
     charCount: len, charCountNoSpace: lenNoSpace,
     min: min, overLimit: overLimit, target: config.target,
     issues: issues, friendlyIssues: friendlyIssues,
-    hasIntroCTA: hasCTA(text.slice(0, introEnd)),
-    hasOutroCTA: hasCTA(text.slice(outroStart)),
+    hasIntroCTA: hasIntroCTA, hasOutroCTA: hasOutroCTA,
     metaPresent: metaPresent, metaValues: metaValues,
+    metaFields: metaFields, arrLabel: arrLabel,
     hasOldDate: hasOldDate, hasFreshDate: hasFreshDate,
     hCodes: hCodes, cCodes: cCodes,
+    category: category,
   };
 }
-
-// 1,3 -> 과 / 2 -> 와
-function gwa(n) { return n === 2 ? "\uC640" : "\uACFC"; }
 
 function checkDuplicates(allResults) {
   var dupIssues = [{}, {}, {}];
   var dupFriendly = [{}, {}, {}];
-  var fields = [
-    { key: "\uC8FC\uC81C", extract: function(r) { return r && r.metaValues && r.metaValues["\uC8FC\uC81C"] ? r.metaValues["\uC8FC\uC81C"].trim().toLowerCase() : ""; }, mode: "exact" },
-    { key: "\uB3C4\uC785\uC720\uD615", extract: function(r) { return r && r.hCodes ? r.hCodes.slice().sort().join(",") : ""; }, mode: "exact" },
-    { key: "\uAD6C\uC131\uC21C\uC11C", extract: function(r) { return r && r.cCodes ? r.cCodes : []; }, mode: "overlap" },
-  ];
-  fields.forEach(function(f) {
-    if (f.mode === "exact") {
-      var values = allResults.map(function(r) { return f.extract(r); });
-      for (var i = 0; i < 3; i++) {
-        if (!values[i]) continue;
-        for (var j = i + 1; j < 3; j++) {
-          if (!values[j]) continue;
-          if (values[i] === values[j]) {
-            dupIssues[i][f.key] = true;
-            dupIssues[j][f.key] = true;
-            dupFriendly[i][f.key] = f.key + " \uB300\uBCF8 " + (j+1) + gwa(j+1) + " \uAC19\uC544\uC694~ \uB2E4\uB974\uAC8C \uBC14\uAFD4\uC8FC\uC138\uC694!";
-            dupFriendly[j][f.key] = f.key + " \uB300\uBCF8 " + (i+1) + gwa(i+1) + " \uAC19\uC544\uC694~ \uB2E4\uB974\uAC8C \uBC14\uAFD4\uC8FC\uC138\uC694!";
-          }
-        }
-      }
-    } else if (f.mode === "overlap") {
-      var codeSets = allResults.map(function(r) { return f.extract(r); });
-      for (var i = 0; i < 3; i++) {
-        if (!codeSets[i] || codeSets[i].length === 0) continue;
-        for (var j = i + 1; j < 3; j++) {
-          if (!codeSets[j] || codeSets[j].length === 0) continue;
-          var overlap = codeSets[i].filter(function(c) { return codeSets[j].indexOf(c) !== -1; });
-          if (overlap.length >= 2) {
-            dupIssues[i][f.key] = true;
-            dupIssues[j][f.key] = true;
-            dupFriendly[i][f.key] = "\uAD6C\uC131\uC21C\uC11C \uB300\uBCF8 " + (j+1) + gwa(j+1) + " " + overlap.length + "\uAC1C \uC911\uBCF5\uB429\uB2C8\uB2E4~ 1\uAC1C\uAE4C\uC9C0\uB294 \uAD1C\uCC2E\uC740\uB370 \uC870\uAE08 \uB354 \uB2E4\uB974\uAC8C \uBC14\uAFD4\uC8FC\uC138\uC694!";
-            dupFriendly[j][f.key] = "\uAD6C\uC131\uC21C\uC11C \uB300\uBCF8 " + (i+1) + gwa(i+1) + " " + overlap.length + "\uAC1C \uC911\uBCF5\uB429\uB2C8\uB2E4~ 1\uAC1C\uAE4C\uC9C0\uB294 \uAD1C\uCC2E\uC740\uB370 \uC870\uAE08 \uB354 \uB2E4\uB974\uAC8C \uBC14\uAFD4\uC8FC\uC138\uC694!";
-          }
-        }
+  if (!allResults[0]) return { dupIssues: dupIssues, dupFriendly: dupFriendly };
+
+  var arrLabel = allResults.filter(Boolean)[0].arrLabel;
+
+  // \uC8FC\uC81C: \uC644\uC804 \uC77C\uCE58
+  var topics = allResults.map(function(r) { return r && r.metaValues && r.metaValues["\uC8FC\uC81C"] ? r.metaValues["\uC8FC\uC81C"].trim().toLowerCase() : ""; });
+  for (var i = 0; i < 3; i++) {
+    if (!topics[i]) continue;
+    for (var j = i + 1; j < 3; j++) {
+      if (!topics[j]) continue;
+      if (topics[i] === topics[j]) {
+        dupIssues[i]["\uC8FC\uC81C"] = true;
+        dupIssues[j]["\uC8FC\uC81C"] = true;
+        dupFriendly[i]["\uC8FC\uC81C"] = "\uC8FC\uC81C \uB300\uBCF8 " + (j+1) + gwa(j+1) + " \uAC19\uC544\uC694~ \uB2E4\uB974\uAC8C \uBC14\uAFD4\uC8FC\uC138\uC694!";
+        dupFriendly[j]["\uC8FC\uC81C"] = "\uC8FC\uC81C \uB300\uBCF8 " + (i+1) + gwa(i+1) + " \uAC19\uC544\uC694~ \uB2E4\uB974\uAC8C \uBC14\uAFD4\uC8FC\uC138\uC694!";
       }
     }
-  });
+  }
+
+  // \uB3C4\uC785\uC720\uD615: \uC644\uC804 \uC77C\uCE58
+  var hVals = allResults.map(function(r) { return r && r.hCodes ? r.hCodes.slice().sort().join(",") : ""; });
+  for (var i = 0; i < 3; i++) {
+    if (!hVals[i]) continue;
+    for (var j = i + 1; j < 3; j++) {
+      if (!hVals[j]) continue;
+      if (hVals[i] === hVals[j]) {
+        dupIssues[i]["\uB3C4\uC785\uC720\uD615"] = true;
+        dupIssues[j]["\uB3C4\uC785\uC720\uD615"] = true;
+        dupFriendly[i]["\uB3C4\uC785\uC720\uD615"] = "\uB3C4\uC785\uC720\uD615 \uB300\uBCF8 " + (j+1) + gwa(j+1) + " \uAC19\uC544\uC694~ \uB2E4\uB974\uAC8C \uBC14\uAFD4\uC8FC\uC138\uC694!";
+        dupFriendly[j]["\uB3C4\uC785\uC720\uD615"] = "\uB3C4\uC785\uC720\uD615 \uB300\uBCF8 " + (i+1) + gwa(i+1) + " \uAC19\uC544\uC694~ \uB2E4\uB974\uAC8C \uBC14\uAFD4\uC8FC\uC138\uC694!";
+      }
+    }
+  }
+
+  // \uAD6C\uC131\uC21C\uC11C/\uBC30\uC5F4\uC804\uB7B5: 2\uAC1C \uC774\uC0C1 \uC911\uBCF5
+  var cSets = allResults.map(function(r) { return r && r.cCodes ? r.cCodes : []; });
+  for (var i = 0; i < 3; i++) {
+    if (cSets[i].length === 0) continue;
+    for (var j = i + 1; j < 3; j++) {
+      if (cSets[j].length === 0) continue;
+      var overlap = cSets[i].filter(function(c) { return cSets[j].indexOf(c) !== -1; });
+      if (overlap.length >= 2) {
+        dupIssues[i][arrLabel] = true;
+        dupIssues[j][arrLabel] = true;
+        dupFriendly[i][arrLabel] = arrLabel + " \uB300\uBCF8 " + (j+1) + gwa(j+1) + " " + overlap.length + "\uAC1C \uC911\uBCF5\uB429\uB2C8\uB2E4~ 1\uAC1C\uAE4C\uC9C0\uB294 \uAD1C\uCC2E\uC740\uB370 \uC870\uAE08 \uB354 \uB2E4\uB974\uAC8C \uBC14\uAFD4\uC8FC\uC138\uC694!";
+        dupFriendly[j][arrLabel] = arrLabel + " \uB300\uBCF8 " + (i+1) + gwa(i+1) + " " + overlap.length + "\uAC1C \uC911\uBCF5\uB429\uB2C8\uB2E4~ 1\uAC1C\uAE4C\uC9C0\uB294 \uAD1C\uCC2E\uC740\uB370 \uC870\uAE08 \uB354 \uB2E4\uB974\uAC8C \uBC14\uAFD4\uC8FC\uC138\uC694!";
+      }
+    }
+  }
+
   return { dupIssues: dupIssues, dupFriendly: dupFriendly };
 }
 
@@ -257,12 +324,10 @@ function generateUnifiedComment(results, dupFriendly) {
     activeResults.push({ idx: i, msgs: allFriendly, passed: allFriendly.length === 0 });
   }
   if (activeResults.length === 0) return null;
-
   var allPassed = activeResults.every(function(r) { return r.passed; });
   if (allPassed) {
     return { passed: true, text: "\u2728 \uC219\uC81C\uD558\uC2DC\uB290\uB77C \uACE0\uC0DD \uB9CE\uC73C\uC168\uC2B5\uB2C8\uB2E4! \uB2F5\uB313\uAE00\uC740 \uB2EC\uC9C0 \uB9D0\uC544\uC8FC\uC138\uC6A9" };
   }
-
   var lines = [];
   activeResults.forEach(function(r) {
     if (r.msgs.length === 0) return;
@@ -270,19 +335,14 @@ function generateUnifiedComment(results, dupFriendly) {
     r.msgs.forEach(function(msg) { lines.push("\u2022 " + msg); });
     lines.push("");
   });
-
-  var body = "\u2728 \uC219\uC81C\uD558\uC2DC\uB290\uB77C \uACE0\uC0DD \uB9CE\uC73C\uC168\uC2B5\uB2C8\uB2E4!\n\n\uB9AC\uB313\uC73C\uB85C\n[\uC218\uC815\uD560 \uB0B4\uC6A9]\n" + lines.join("\n").trim() + "\n\n\uC774 \uAC8C\uC2DC\uAE00\uC740 \uC0AD\uC81C\uD558\uC2DC\uACE0 \uC544\uC26C\uC6B4 \uBD80\uBD84\uB9CC \uC870\uAE08 \uB354 \uBCF4\uC644\uD574\uC11C '\uC0C8 \uAC8C\uC2DC\uAE00'\uB85C \uC81C\uCD9C\uD574 \uC8FC\uC2DC\uBA74 \uBE60\uB974\uAC8C \uD655\uC778\uD574 \uB4DC\uB9B4\uAC8C\uC694! \uD654\uC774\uD305! \uD83E\uDDE1";
-  return { passed: false, text: body };
+  return { passed: false, text: "\u2728 \uC219\uC81C\uD558\uC2DC\uB290\uB77C \uACE0\uC0DD \uB9CE\uC73C\uC168\uC2B5\uB2C8\uB2E4!\n\n\uB9AC\uB313\uC73C\uB85C\n[\uC218\uC815\uD560 \uB0B4\uC6A9]\n" + lines.join("\n").trim() + "\n\n\uC774 \uAC8C\uC2DC\uAE00\uC740 \uC0AD\uC81C\uD558\uC2DC\uACE0 \uC544\uC26C\uC6B4 \uBD80\uBD84\uB9CC \uC870\uAE08 \uB354 \uBCF4\uC644\uD574\uC11C '\uC0C8 \uAC8C\uC2DC\uAE00'\uB85C \uC81C\uCD9C\uD574 \uC8FC\uC2DC\uBA74 \uBE60\uB974\uAC8C \uD655\uC778\uD574 \uB4DC\uB9B4\uAC8C\uC694! \uD654\uC774\uD305! \uD83E\uDDE1" };
 }
 
-/* === UI === */
+/* ===== UI ===== */
 function Badge({ passed }) {
-  return (<span style={{
-    display: "inline-flex", alignItems: "center", gap: "4px",
-    padding: "3px 10px", borderRadius: "20px", fontSize: "13px", fontWeight: 700,
-    background: passed ? "#E8F5E9" : "#FFF3E0", color: passed ? "#2E7D32" : "#E65100",
-    border: "1.5px solid " + (passed ? "#A5D6A7" : "#FFCC80"),
-  }}>{passed ? "\u2705 \uD1B5\uACFC" : "\u274C \uBC18\uB824"}</span>);
+  return (<span style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "3px 10px", borderRadius: "20px", fontSize: "13px", fontWeight: 700, background: passed ? "#E8F5E9" : "#FFF3E0", color: passed ? "#2E7D32" : "#E65100", border: "1.5px solid " + (passed ? "#A5D6A7" : "#FFCC80") }}>
+    {passed ? "\u2705 \uD1B5\uACFC" : "\u274C \uBC18\uB824"}
+  </span>);
 }
 
 function InfoBadge({ ok, label, warn }) {
@@ -295,10 +355,11 @@ function InfoBadge({ ok, label, warn }) {
 }
 
 function CharBar({ count, min, max }) {
-  var rw = max - min; var dMin = Math.max(0, min - rw * 0.15); var dMax = max + rw * 0.15; var dr = dMax - dMin;
-  var minP = ((min - dMin) / dr) * 100; var maxP = ((max - dMin) / dr) * 100;
+  var effectiveMax = max || count + 2000;
+  var rw = effectiveMax - min; var dMin = Math.max(0, min - rw * 0.15); var dMax = effectiveMax + rw * 0.15; var dr = dMax - dMin;
+  var minP = ((min - dMin) / dr) * 100; var maxP = ((effectiveMax - dMin) / dr) * 100;
   var cP = Math.min(100, Math.max(0, ((count - dMin) / dr) * 100));
-  var ok = count >= min && count <= max;
+  var ok = count >= min && (!max || count <= max);
   return (<div style={{ margin: "8px 0 4px", position: "relative", height: "32px" }}>
     <div style={{ position: "absolute", top: "10px", left: 0, right: 0, height: "12px", background: "var(--border-color, #e0e0e0)", borderRadius: "6px", overflow: "hidden" }}>
       <div style={{ position: "absolute", left: minP + "%", width: (maxP - minP) + "%", height: "100%", background: "linear-gradient(90deg, #A5D6A7, #66BB6A)", borderRadius: "6px" }} />
@@ -345,39 +406,34 @@ function ScriptPanel({ config, index, result, dupIssueMap, onTextChange, text })
       </div>)}
 
       {result && (<div style={{ marginTop: "14px", padding: "16px", borderRadius: "12px", background: passed ? "rgba(46,125,50,0.06)" : "rgba(230,81,0,0.06)", border: "1px solid " + (passed ? "#C8E6C9" : "#FFE0B2") }}>
-        {/* \uAE00\uC790\uC218 */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
           <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary, #333)" }}>
             {"\uACF5\uBC31\uD3EC\uD568 " + result.charCount.toLocaleString() + "\uC790 / \uACF5\uBC31\uC81C\uC678 " + result.charCountNoSpace.toLocaleString() + "\uC790"}
           </span>
         </div>
         <div style={{ fontSize: "12px", color: "var(--text-secondary, #888)", marginBottom: "4px" }}>
-          {"\uCD5C\uC18C " + result.min.toLocaleString() + "\uC790 / \uAE30\uC900 " + result.target.toLocaleString() + "\uC790"}
+          {"\uCD5C\uC18C " + result.min.toLocaleString() + "\uC790 / \uAE30\uC900 " + result.target.toLocaleString() + "\uC790" + (result.overLimit ? " / \uCD5C\uB300 " + result.overLimit.toLocaleString() + "\uC790" : " / \uCD08\uACFC \uC81C\uD55C \uC5C6\uC74C")}
         </div>
         <CharBar count={result.charCount} min={result.min} max={result.overLimit} />
 
-        {/* \uBA54\uD0C0 */}
         <div style={{ display: "flex", gap: "6px", marginTop: "12px", flexWrap: "wrap" }}>
-          {META_FIELDS.map(function(f) { return <InfoBadge key={f.key} ok={result.metaPresent[f.key]} label={f.key} />; })}
+          {result.metaFields.map(function(k) { return <InfoBadge key={k} ok={result.metaPresent[k]} label={k} />; })}
         </div>
         {Object.values(result.metaValues).some(Boolean) && (<div style={{ display: "flex", gap: "6px", marginTop: "8px", flexWrap: "wrap" }}>
-          {META_FIELDS.map(function(f) { return <MetaTag key={f.key} label={f.key} value={result.metaValues[f.key]} isDup={!!(dupIssueMap && dupIssueMap[f.key])} />; })}
+          {result.metaFields.map(function(k) { return <MetaTag key={k} label={k} value={result.metaValues[k]} isDup={!!(dupIssueMap && dupIssueMap[k])} />; })}
         </div>)}
 
-        {/* \uB0A0\uC9DC */}
-        <div style={{ display: "flex", gap: "6px", marginTop: "8px" }}>
+        {result.category === "info" && (<div style={{ display: "flex", gap: "6px", marginTop: "8px" }}>
           <InfoBadge ok={result.hasFreshDate && !result.hasOldDate} warn={result.hasOldDate}
             label={result.hasOldDate ? "\uACFC\uAC70 \uAE30\uC900 \uB0A0\uC9DC \uAC10\uC9C0" : result.hasFreshDate ? "2026\uB144 \uAE30\uC900 \uD655\uC778" : "\uB0A0\uC9DC \uBBF8\uD655\uC778"} />
-        </div>
+        </div>)}
 
-        {/* CTA */}
         <div style={{ display: "flex", gap: "6px", marginTop: "8px" }}>
           <InfoBadge ok={result.hasIntroCTA} label={"\uB3C4\uC785\uBD80 CTA"} />
           <InfoBadge ok={result.hasOutroCTA} label={"\uB9C8\uBB34\uB9AC CTA"} />
         </div>
         <div style={{ fontSize: "11px", color: "var(--text-secondary, #aaa)", marginTop: "3px" }}>{"\u203B CTA\uB294 \uCC38\uACE0 \uD45C\uC2DC\uC774\uBA70 \uBC18\uB824 \uAE30\uC900\uC774 \uC544\uB2D9\uB2C8\uB2E4"}</div>
 
-        {/* \uBC18\uB824 \uC0AC\uC720 */}
         {(result.issues.length > 0 || hasDupIssue) && (<div style={{ marginTop: "12px", padding: "10px 12px", borderRadius: "8px", background: "rgba(191,54,12,0.05)" }}>
           <div style={{ fontSize: "12px", fontWeight: 700, color: "#BF360C", marginBottom: "6px" }}>{"\uBC18\uB824 \uC0AC\uC720"}</div>
           {result.friendlyIssues.map(function(msg, i) { return (<div key={i} style={{ padding: "4px 0", fontSize: "13px", color: "#BF360C", display: "flex", gap: "6px" }}><span>{"\u26A0"}</span><span>{msg}</span></div>); })}
@@ -389,6 +445,7 @@ function ScriptPanel({ config, index, result, dupIssueMap, onTextChange, text })
 }
 
 function App() {
+  var _cat = useState(""), category = _cat[0], setCategory = _cat[1];
   var _t = useState(["", "", ""]), texts = _t[0], setTexts = _t[1];
   var _r = useState([null, null, null]), results = _r[0], setResults = _r[1];
   var _d = useState([{}, {}, {}]), dupIssues = _d[0], setDupIssues = _d[1];
@@ -401,13 +458,10 @@ function App() {
   }, []);
 
   var handleReviewAll = useCallback(function() {
-    var nr = SCRIPTS.map(function(c, i) { return texts[i].trim() ? analyzeScript(texts[i], c) : null; });
+    var nr = SCRIPTS.map(function(c, i) { return texts[i].trim() ? analyzeScript(texts[i], c, category) : null; });
     var d = checkDuplicates(nr);
-    setResults(nr);
-    setDupIssues(d.dupIssues);
-    setDupFriendly(d.dupFriendly);
-    setCopied(false);
-  }, [texts]);
+    setResults(nr); setDupIssues(d.dupIssues); setDupFriendly(d.dupFriendly); setCopied(false);
+  }, [texts, category]);
 
   var handleReset = useCallback(function() {
     setTexts(["", "", ""]); setResults([null, null, null]);
@@ -417,13 +471,40 @@ function App() {
   var filledCount = texts.filter(function(t) { return t.trim(); }).length;
   var hasAnyResult = results.some(function(r) { return r !== null; });
   var unified = hasAnyResult ? generateUnifiedComment(results, dupFriendly) : null;
+  var catLabel = category === "info" ? "\uC815\uBCF4" : "\uC5ED\uC0AC";
+
+  if (!category) {
+    return (<div style={{ minHeight: "100vh", padding: "24px 16px", fontFamily: "'Pretendard', sans-serif", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet" />
+      <div style={{ maxWidth: "400px", width: "100%", textAlign: "center" }}>
+        <h1 style={{ fontSize: "22px", fontWeight: 800, color: "var(--text-primary, #1a1a1a)", margin: "0 0 8px" }}>{"\uC2E4\uBC84\uC778\uD3EC\uB871\uD3FC \uB2E4\uBCA4\uC838\uC2A4"}</h1>
+        <p style={{ fontSize: "14px", color: "var(--text-secondary, #999)", margin: "0 0 32px" }}>{"\uC219\uC81C \uB300\uBCF8\uAC80\uD1A0\uC6A9"}</p>
+        <p style={{ fontSize: "15px", fontWeight: 600, color: "var(--text-primary, #333)", marginBottom: "16px" }}>{"\uB300\uBCF8 \uCE74\uD14C\uACE0\uB9AC\uB97C \uC120\uD0DD\uD574\uC8FC\uC138\uC694"}</p>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button onClick={function() { setCategory("info"); }} style={{ flex: 1, padding: "20px", borderRadius: "16px", border: "2px solid var(--border-color, #e5e5e5)", background: "var(--card-bg, #fff)", cursor: "pointer", fontFamily: "'Pretendard', sans-serif", fontSize: "18px", fontWeight: 800, color: "#1565C0", transition: "all 0.2s" }}>
+            {"\uD83D\uDCCA \uC815\uBCF4"}
+          </button>
+          <button onClick={function() { setCategory("history"); }} style={{ flex: 1, padding: "20px", borderRadius: "16px", border: "2px solid var(--border-color, #e5e5e5)", background: "var(--card-bg, #fff)", cursor: "pointer", fontFamily: "'Pretendard', sans-serif", fontSize: "18px", fontWeight: 800, color: "#BF360C", transition: "all 0.2s" }}>
+            {"\uD83D\uDCDC \uC5ED\uC0AC"}
+          </button>
+        </div>
+      </div>
+    </div>);
+  }
 
   return (<div style={{ minHeight: "100vh", padding: "24px 16px", fontFamily: "'Pretendard', sans-serif", background: "transparent" }}>
     <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet" />
     <div style={{ maxWidth: "640px", margin: "0 auto" }}>
       <div style={{ textAlign: "center", marginBottom: "24px" }}>
-        <h1 style={{ fontSize: "22px", fontWeight: 800, color: "var(--text-primary, #1a1a1a)", margin: "0 0 6px", letterSpacing: "-0.5px" }}>{"\uC2E4\uBC84\uC778\uD3EC\uB871\uD3FC \uB2E4\uBCA4\uC838\uC2A4 \uC219\uC81C \uB300\uBCF8\uAC80\uD1A0\uC6A9"}</h1>
-        <p style={{ fontSize: "13px", color: "var(--text-secondary, #999)", margin: 0 }}>{"\uD504\uB86C\uD504\uD2B80 \uD615\uC2DD \u00B7 \uAE00\uC790\uC218 \u00B7 \uC911\uBCF5\uBE44\uAD50 \u00B7 \uCD5C\uC2E0\uC131 \u00B7 \uD734\uBA3C\uD130\uCE58 \uD1B5\uD569 \uAC80\uD1A0"}</p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "6px" }}>
+          <h1 style={{ fontSize: "22px", fontWeight: 800, color: "var(--text-primary, #1a1a1a)", margin: 0, letterSpacing: "-0.5px" }}>{"\uC2E4\uBC84\uC778\uD3EC\uB871\uD3FC \uB2E4\uBCA4\uC838\uC2A4 \uC219\uC81C \uB300\uBCF8\uAC80\uD1A0\uC6A9"}</h1>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          <span style={{ padding: "3px 12px", borderRadius: "20px", fontSize: "13px", fontWeight: 700, background: category === "info" ? "#E3F2FD" : "#FBE9E7", color: category === "info" ? "#1565C0" : "#BF360C", border: "1px solid " + (category === "info" ? "#90CAF9" : "#FFAB91") }}>
+            {"\uB300\uBCF8 \uCE74\uD14C\uACE0\uB9AC : " + catLabel}
+          </span>
+          <button onClick={function() { setCategory(""); handleReset(); }} style={{ padding: "3px 10px", borderRadius: "20px", fontSize: "12px", fontWeight: 600, background: "none", border: "1px solid var(--border-color, #ddd)", cursor: "pointer", color: "var(--text-secondary, #888)", fontFamily: "'Pretendard', sans-serif" }}>{"\uBCC0\uACBD"}</button>
+        </div>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -437,7 +518,6 @@ function App() {
         <button onClick={handleReset} style={{ padding: "13px 20px", borderRadius: "12px", border: "1.5px solid var(--border-color, #ddd)", background: "none", fontSize: "14px", fontWeight: 600, cursor: "pointer", color: "var(--text-secondary, #666)", fontFamily: "'Pretendard', sans-serif" }}>{"\uCD08\uAE30\uD654"}</button>
       </div>
 
-      {/* \uD1B5\uD569 \uACB0\uACFC */}
       {unified && (<div style={{ marginTop: "16px", padding: "20px", borderRadius: "16px", background: unified.passed ? "rgba(46,125,50,0.06)" : "rgba(230,81,0,0.06)", border: "2px solid " + (unified.passed ? "#A5D6A7" : "#FFCC80") }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
           <span style={{ fontSize: "16px", fontWeight: 800, color: "var(--text-primary, #1a1a1a)" }}>{"\uD1B5\uD569 \uACB0\uACFC"}</span>
@@ -454,16 +534,15 @@ function App() {
         </div>
       </div>)}
 
-      {/* \uAC80\uD1A0 \uAE30\uC900 */}
       <div style={{ marginTop: "20px", padding: "14px", borderRadius: "12px", background: "var(--card-bg, #f8f9fa)", border: "1px solid var(--border-color, #e5e5e5)" }}>
-        <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-secondary, #888)", marginBottom: "8px" }}>{"\uAC80\uD1A0 \uAE30\uC900"}</div>
+        <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-secondary, #888)", marginBottom: "8px" }}>{"\uAC80\uD1A0 \uAE30\uC900 (" + catLabel + ")"}</div>
         <div style={{ fontSize: "13px", color: "var(--text-primary, #555)", lineHeight: 1.9 }}>
-          <div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 \uC0C1\uB2E8\uC5D0 \uC8FC\uC81C, \uB3C4\uC785\uC720\uD615, \uAD6C\uC131\uC21C\uC11C \uC5C6\uC73C\uBA74"}</div>
-          <div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 3\uAC1C \uB300\uBCF8 \uAC04 \uC8FC\uC81C \u00B7 \uB3C4\uC785\uC720\uD615 \u00B7 \uAD6C\uC131\uC21C\uC11C \uC911\uBCF5 \uC2DC"}</div>
-          <div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 \uAE00\uC790\uC218 \uBD80\uC871(\uAE30\uC900 -2,000\uC790 \uBBF8\uB9CC) \uB610\uB294 \uACFC\uB2E4 \uCD08\uACFC(\uAE30\uC900 +5,000\uC790 \uC774\uC0C1)"}</div>
-          <div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 \u26A0\uFE0F / \uCD9C\uCC98: / \u26A0\uFE0F \uBD88\uD655\uC2E4: \uD0A4\uC6CC\uB4DC \uD3EC\uD568"}</div>
+          <div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 \uC0C1\uB2E8\uC5D0 \uC8FC\uC81C, \uB3C4\uC785\uC720\uD615, " + (category === "info" ? "\uAD6C\uC131\uC21C\uC11C" : "\uBC30\uC5F4\uC804\uB7B5") + " \uC5C6\uC73C\uBA74"}</div>
+          <div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 3\uAC1C \uB300\uBCF8 \uAC04 \uC8FC\uC81C \u00B7 \uB3C4\uC785\uC720\uD615 \u00B7 " + (category === "info" ? "\uAD6C\uC131\uC21C\uC11C" : "\uBC30\uC5F4\uC804\uB7B5") + " \uC911\uBCF5 \uC2DC"}</div>
+          <div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 \uAE00\uC790\uC218 \uBD80\uC871(\uAE30\uC900 -2,000\uC790 \uBBF8\uB9CC) / \uB300\uBCF8 1\u00B72 \uCD08\uACFC(+5,000\uC790 \uC774\uC0C1) / \uB300\uBCF8 3 \uCD08\uACFC \uC81C\uD55C \uC5C6\uC74C"}</div>
+          {category === "info" && (<div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 \u26A0\uFE0F / \uCD9C\uCC98: / \u26A0\uFE0F \uBD88\uD655\uC2E4: \uD0A4\uC6CC\uB4DC \uD3EC\uD568"}</div>)}
           <div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 \u201C\uB2E4\uC74C\u201D \uB610\uB294 \u201C\uC624\uCF00\uC774\u201D \uC785\uB825\uD558\uC2DC\uBA74 \uBB38\uAD6C \uB4F1 AI \uBCF5\uBD99 \uD754\uC801"}</div>
-          <div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 \uACFC\uAC70 \uAE30\uC900(2025\uB144 \uC774\uC804) \uB0A0\uC9DC\uB9CC \uC788\uACE0 2026\uB144 \uAE30\uC900 \uC815\uBCF4 \uC5C6\uC744 \uB54C"}</div>
+          {category === "info" && (<div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 \uACFC\uAC70 \uAE30\uC900(2025\uB144 \uC774\uC804) \uB0A0\uC9DC\uB9CC \uC788\uACE0 2026\uB144 \uAE30\uC900 \uC815\uBCF4 \uC5C6\uC744 \uB54C"}</div>)}
           <div style={{ color: "var(--text-secondary, #999)" }}><span style={{ fontWeight: 700 }}>{"\uCC38\uACE0"}</span>{" \u2022 \uB3C4\uC785\uBD80/\uB9C8\uBB34\uB9AC CTA \uC720\uB3C4 \uBA58\uD2B8 \uC720\uBB34 (\uBC18\uB824 \uAE30\uC900 \uC544\uB2D8)"}</div>
         </div>
       </div>
