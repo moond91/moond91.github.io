@@ -17,10 +17,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Pretendard', sans-serif; background: #f5f5f5; }
   :root { --text-primary: #1a1a1a; --text-secondary: #888; --card-bg: #ffffff; --input-bg: #fafafa; --border-color: #e5e5e5; }
-  @media (prefers-color-scheme: dark) {
-    body { background: #1a1a1a; }
-    :root { --text-primary: #e5e5e5; --text-secondary: #999; --card-bg: #2a2a2a; --input-bg: #333; --border-color: #444; }
-  }
+  @media (prefers-color-scheme: dark) { body { background: #1a1a1a; } :root { --text-primary: #e5e5e5; --text-secondary: #999; --card-bg: #2a2a2a; --input-bg: #333; --border-color: #444; } }
 </style>
 </head>
 <body>
@@ -106,8 +103,8 @@ var CTA_KEYWORDS = [
 ];
 
 var META_TOPIC = { key: "\uC8FC\uC81C", patterns: ["\uC8FC\uC81C"] };
-var META_INTRO_INFO = { key: "\uB3C4\uC785\uC720\uD615", patterns: ["\uB3C4\uC785 \uC720\uD615", "\uB3C4\uC785\uC720\uD615"] };
-var META_ARR_INFO = { key: "\uAD6C\uC131\uC21C\uC11C", patterns: ["\uAD6C\uAC04 \uAD6C\uC131", "\uAD6C\uAC04\uAD6C\uC131", "\uAD6C\uC131\uC21C\uC11C", "\uAD6C\uC131 \uC21C\uC11C", "\uBC30\uC5F4"] };
+var META_INTRO_INFO = { key: "\uB3C4\uC785\uC720\uD615", patterns: ["\uB3C4\uC785\uBD80 \uC720\uD615", "\uB3C4\uC785\uBD80\uC720\uD615", "\uB3C4\uC785 \uC720\uD615", "\uB3C4\uC785\uC720\uD615"] };
+var META_ARR_INFO = { key: "\uAD6C\uC131\uC21C\uC11C", patterns: ["\uAD6C\uAC04 \uAD6C\uC131 \uBC0F \uC21C\uC11C", "\uAD6C\uAC04 \uAD6C\uC131\uBC0F\uC21C\uC11C", "\uAD6C\uAC04 \uAD6C\uC131", "\uAD6C\uAC04\uAD6C\uC131", "\uAD6C\uC131\uC21C\uC11C", "\uAD6C\uC131 \uC21C\uC11C", "\uBC30\uC5F4"] };
 var META_INTRO_HIST = { key: "\uB3C4\uC785\uC720\uD615", patterns: ["\uB3C4\uC785 \uC720\uD615", "\uB3C4\uC785\uC720\uD615", "\uB3C4\uC785\uBD80 \uC720\uD615", "\uB3C4\uC785\uBD80\uC720\uD615"] };
 var META_ARR_HIST = { key: "\uBC30\uC5F4\uC804\uB7B5", patterns: ["\uBC30\uC5F4 \uC804\uB7B5", "\uBC30\uC5F4\uC804\uB7B5", "\uAD6C\uC131\uC21C\uC11C", "\uAD6C\uC131 \uC21C\uC11C", "\uAD6C\uAC04 \uAD6C\uC131"] };
 
@@ -194,14 +191,16 @@ function analyzeScript(text, config, category) {
   var introField = isInfo ? META_INTRO_INFO : META_INTRO_HIST;
   var hTypeList = isInfo ? INFO_H_TYPES : HIST_H_TYPES;
   var hCodeRegex = isInfo ? /H[1-8]/g : /[A-H](?=[\s::\-\u2013\u2014|,\uFF1A]|$)/g;
-  var hCodes = extractTypes(headerText, hTypeList, hCodeRegex);
-  // \uD5E4\uB354\uC5D0\uC11C \uD0A4\uC6CC\uB4DC\uB85C\uB3C4 \uCCB4\uD06C
+  var hCodes = [];
+  // 1) \uBA3C\uC800 "\uB3C4\uC785 \uC720\uD615:" \uC904\uC758 \uAC12\uC5D0\uC11C \uCD94\uCD9C
+  var introVal = extractMetaValue(headerLines, introField);
+  if (introVal) {
+    hCodes = extractTypes(introVal, hTypeList, hCodeRegex);
+    if (hCodes.length === 0) hCodes = ["custom:" + introVal];
+  }
+  // 2) \uBABB \uCC3E\uC73C\uBA74 \uD5E4\uB354 \uC804\uCCB4\uC5D0\uC11C \uCF54\uB4DC/\uD55C\uAE00\uBA85 \uAC80\uC0C9
   if (hCodes.length === 0) {
-    var introVal = extractMetaValue(headerLines, introField);
-    if (introVal) {
-      hCodes = extractTypes(introVal, hTypeList, hCodeRegex);
-      if (hCodes.length === 0) hCodes = ["custom:" + introVal];
-    }
+    hCodes = extractTypes(headerText, hTypeList, hCodeRegex);
   }
   metaPresent["\uB3C4\uC785\uC720\uD615"] = hCodes.length > 0;
   metaValues["\uB3C4\uC785\uC720\uD615"] = hCodes.length > 0 ? hCodes.map(function(c) { return c.indexOf("custom:") === 0 ? c.slice(7) : getLabel(c, hTypeList); }).join(", ") : null;
@@ -211,13 +210,14 @@ function analyzeScript(text, config, category) {
   var arrLabel = isInfo ? "\uAD6C\uC131\uC21C\uC11C" : "\uBC30\uC5F4\uC804\uB7B5";
   var cTypeList = isInfo ? INFO_C_TYPES : HIST_ARR_TYPES;
   var cCodeRegex = isInfo ? /C(?:1[0-2]|[1-9])(?!\d)/g : /\uC804\uB7B5\s*[A-H]|[A-H](?=[\s::\.\-])/g;
-  var cCodes = extractTypes(headerText, cTypeList, cCodeRegex);
+  var cCodes = [];
+  var arrVal = extractMetaValue(headerLines, arrField);
+  if (arrVal) {
+    cCodes = extractTypes(arrVal, cTypeList, cCodeRegex);
+    if (cCodes.length === 0) cCodes = ["custom:" + arrVal];
+  }
   if (cCodes.length === 0) {
-    var arrVal = extractMetaValue(headerLines, arrField);
-    if (arrVal) {
-      cCodes = extractTypes(arrVal, cTypeList, cCodeRegex);
-      if (cCodes.length === 0) cCodes = ["custom:" + arrVal];
-    }
+    cCodes = extractTypes(headerText, cTypeList, cCodeRegex);
   }
   metaPresent[arrLabel] = cCodes.length > 0;
   metaValues[arrLabel] = cCodes.length > 0 ? cCodes.map(function(c) { return c.indexOf("custom:") === 0 ? c.slice(7) : getLabel(c, cTypeList); }).join(" \u2192 ") : null;
