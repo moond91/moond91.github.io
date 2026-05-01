@@ -139,7 +139,7 @@ function getLabel(code, typeList) {
 }
 
 var OLD_DATE = [/20(?:1\d|2[0-4])\uB144\s*(?:\uAE30\uC900|\uD604\uC7AC|\uD604\uD589|\uC801\uC6A9|\uC2DC\uD589)/, /2025\uB144\s*(?:\uAE30\uC900|\uD604\uC7AC|\uD604\uD589|\uC801\uC6A9|\uC2DC\uD589)/];
-var FRESH_DATE = [/2026\uB144/, /\uC62C\uD574/, /\uD604\uC7AC\s*\uAE30\uC900/, /\uCD5C\uC2E0/];
+var FRESH_DATE = [/2026\uB144/];
 
 function gwa(n) { return n === 2 ? "\uC640" : "\uACFC"; }
 
@@ -297,18 +297,26 @@ function checkDuplicates(allResults) {
     }
   }
 
-  // \uAD6C\uC131\uC21C\uC11C/\uBC30\uC5F4\uC804\uB7B5: 2\uAC1C \uC774\uC0C1 \uC911\uBCF5
+  // \uAD6C\uC131\uC21C\uC11C/\uBC30\uC5F4\uC804\uB7B5: \uC5F0\uC18D 2\uAC1C\uAC00 \uAC19\uC740 \uC21C\uC11C\uB85C \uC774\uC5B4\uC9C0\uBA74 \uBC18\uB824
   var cSets = allResults.map(function(r) { return r && r.cCodes ? r.cCodes : []; });
   for (var i = 0; i < 3; i++) {
-    if (cSets[i].length === 0) continue;
+    if (cSets[i].length < 2) continue;
     for (var j = i + 1; j < 3; j++) {
-      if (cSets[j].length === 0) continue;
-      var overlap = cSets[i].filter(function(c) { return cSets[j].indexOf(c) !== -1; });
-      if (overlap.length >= 2) {
+      if (cSets[j].length < 2) continue;
+      var pairsI = [];
+      for (var p = 0; p < cSets[i].length - 1; p++) {
+        pairsI.push(cSets[i][p] + "," + cSets[i][p+1]);
+      }
+      var pairsJ = [];
+      for (var q = 0; q < cSets[j].length - 1; q++) {
+        pairsJ.push(cSets[j][q] + "," + cSets[j][q+1]);
+      }
+      var commonPair = pairsI.some(function(pair) { return pairsJ.indexOf(pair) !== -1; });
+      if (commonPair) {
         dupIssues[i][arrLabel] = true;
         dupIssues[j][arrLabel] = true;
-        dupFriendly[i][arrLabel] = arrLabel + " \uB300\uBCF8 " + (j+1) + gwa(j+1) + " " + overlap.length + "\uAC1C \uC911\uBCF5\uB429\uB2C8\uB2E4~ 1\uAC1C\uAE4C\uC9C0\uB294 \uAD1C\uCC2E\uC740\uB370 \uC870\uAE08 \uB354 \uB2E4\uB974\uAC8C \uBC14\uAFD4\uC8FC\uC138\uC694!";
-        dupFriendly[j][arrLabel] = arrLabel + " \uB300\uBCF8 " + (i+1) + gwa(i+1) + " " + overlap.length + "\uAC1C \uC911\uBCF5\uB429\uB2C8\uB2E4~ 1\uAC1C\uAE4C\uC9C0\uB294 \uAD1C\uCC2E\uC740\uB370 \uC870\uAE08 \uB354 \uB2E4\uB974\uAC8C \uBC14\uAFD4\uC8FC\uC138\uC694!";
+        dupFriendly[i][arrLabel] = arrLabel + " \uB300\uBCF8 " + (j+1) + gwa(j+1) + " \uC5F0\uC18D \uAD6C\uAC04\uC774 \uAC19\uC544\uC694~ \uC21C\uC11C\uB97C \uBC14\uAFD4\uC8FC\uC138\uC694!";
+        dupFriendly[j][arrLabel] = arrLabel + " \uB300\uBCF8 " + (i+1) + gwa(i+1) + " \uC5F0\uC18D \uAD6C\uAC04\uC774 \uAC19\uC544\uC694~ \uC21C\uC11C\uB97C \uBC14\uAFD4\uC8FC\uC138\uC694!";
       }
     }
   }
