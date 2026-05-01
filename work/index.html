@@ -235,9 +235,9 @@ function analyzeScript(text, config, category) {
   if (isInfo) {
     hasOldDate = OLD_DATE.some(function(r) { return r.test(text); });
     hasFreshDate = FRESH_DATE.some(function(r) { return r.test(text); });
-    if (hasOldDate && !hasFreshDate) {
+    if (!hasFreshDate) {
       issues.push("oldDate");
-      friendlyIssues.push("2026\uB144 \uCD5C\uC2E0 \uAE30\uC900\uC73C\uB85C \uC5C5\uB370\uC774\uD2B8\uD574\uC8FC\uC138\uC694!");
+      friendlyIssues.push("2026\uB144 \uCD5C\uC2E0 \uAE30\uC900\uC774 \uC5C6\uC5B4\uC694~ 2026\uB144 \uAE30\uC900\uC73C\uB85C \uC5C5\uB370\uC774\uD2B8\uD574\uC8FC\uC138\uC694!");
     }
   }
 
@@ -542,7 +542,7 @@ function App() {
           <div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 \uAE00\uC790\uC218 \uBD80\uC871(\uAE30\uC900 -2,000\uC790 \uBBF8\uB9CC) / \uB300\uBCF8 1\u00B72 \uCD08\uACFC(+5,000\uC790 \uC774\uC0C1) / \uB300\uBCF8 3 \uCD08\uACFC \uC81C\uD55C \uC5C6\uC74C"}</div>
           {category === "info" && (<div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 \u26A0\uFE0F / \uCD9C\uCC98: / \u26A0\uFE0F \uBD88\uD655\uC2E4: \uD0A4\uC6CC\uB4DC \uD3EC\uD568"}</div>)}
           <div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 \u201C\uB2E4\uC74C\u201D \uB610\uB294 \u201C\uC624\uCF00\uC774\u201D \uC785\uB825\uD558\uC2DC\uBA74 \uBB38\uAD6C \uB4F1 AI \uBCF5\uBD99 \uD754\uC801"}</div>
-          {category === "info" && (<div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 \uACFC\uAC70 \uAE30\uC900(2025\uB144 \uC774\uC804) \uB0A0\uC9DC\uB9CC \uC788\uACE0 2026\uB144 \uAE30\uC900 \uC815\uBCF4 \uC5C6\uC744 \uB54C"}</div>)}
+          {category === "info" && (<div><span style={{ color: "#BF360C", fontWeight: 700 }}>{"\uBC18\uB824"}</span>{" \u2022 2026\uB144 \uCD5C\uC2E0 \uAE30\uC900 \uC815\uBCF4\uAC00 \uC5C6\uC744 \uB54C"}</div>)}
           <div style={{ color: "var(--text-secondary, #999)" }}><span style={{ fontWeight: 700 }}>{"\uCC38\uACE0"}</span>{" \u2022 \uB3C4\uC785\uBD80/\uB9C8\uBB34\uB9AC CTA \uC720\uB3C4 \uBA58\uD2B8 \uC720\uBB34 (\uBC18\uB824 \uAE30\uC900 \uC544\uB2D8)"}</div>
         </div>
       </div>
