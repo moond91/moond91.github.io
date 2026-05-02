@@ -308,7 +308,7 @@ function checkDuplicates(allResults) {
         if (a[ai] === b[bi]) {
           var len = 1;
           while (ai + len < a.length && bi + len < b.length && a[ai + len] === b[bi + len]) { len++; }
-          if (len >= 2) {
+          if (len >= 3) {
             matches.push(a.slice(ai, ai + len));
           }
         }
