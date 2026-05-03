@@ -112,11 +112,12 @@ function hasCTA(section) { return CTA_KEYWORDS.some(function(kw) { return sectio
 
 function extractMetaValue(headerLines, field) {
   for (var i = 0; i < headerLines.length; i++) {
+    var normalized = headerLines[i].replace(/\s+/g, " ");
     for (var j = 0; j < field.patterns.length; j++) {
-      var idx = headerLines[i].indexOf(field.patterns[j]);
+      var idx = normalized.indexOf(field.patterns[j]);
       if (idx !== -1) {
-        var after = headerLines[i].slice(idx + field.patterns[j].length).replace(/^[\s::\-\u2013\u2014|]+/, "").trim();
-        return after || headerLines[i].trim();
+        var after = normalized.slice(idx + field.patterns[j].length).replace(/^[\s::\-\u2013\u2014|]+/, "").trim();
+        return after || normalized.trim();
       }
     }
   }
@@ -282,8 +283,8 @@ function checkDuplicates(allResults) {
     }
   }
 
-  // \uB3C4\uC785\uC720\uD615: \uC644\uC804 \uC77C\uCE58
-  var hVals = allResults.map(function(r) { return r && r.hCodes ? r.hCodes.slice().sort().join(",") : ""; });
+  // \uB3C4\uC785\uC720\uD615: \uCCAB \uBC88\uC9F8(\uBA54\uC778) \uC720\uD615\uB9CC \uBE44\uAD50, \uBCF4\uC870\uC720\uD615\uC740 \uBB34\uC2DC
+  var hVals = allResults.map(function(r) { return r && r.hCodes && r.hCodes.length > 0 ? r.hCodes[0] : ""; });
   for (var i = 0; i < 3; i++) {
     if (!hVals[i]) continue;
     for (var j = i + 1; j < 3; j++) {
