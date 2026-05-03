@@ -188,7 +188,8 @@ function analyzeScript(text, config, category) {
     var foundForbidden = INFO_FORBIDDEN.filter(function(kw) { return text.includes(kw); });
     if (foundForbidden.length > 0) {
       issues.push("forbidden");
-      friendlyIssues.push("\uD734\uBA3C\uD130\uCE58 \uC548 \uD558\uC2E0 \uAC8C \uBCF4\uC5EC\uC694~ \uBD88\uD655\uC2E4, \uCD9C\uCC98 \uAE30\uD638 \uCCB4\uD06C\uD574\uC8FC\uC138\uC694!");
+      var kwList = foundForbidden.map(function(k) { return "\u300C" + k + "\u300D"; }).join(" ");
+      friendlyIssues.push("\uD734\uBA3C\uD130\uCE58 \uC548 \uD558\uC2E0 \uAC8C \uBCF4\uC5EC\uC694~ \uCCB4\uD06C\uD574\uC8FC\uC138\uC694!\n\uBC1C\uACAC\uB41C \uD0A4\uC6CC\uB4DC : " + kwList);
     }
   }
 
