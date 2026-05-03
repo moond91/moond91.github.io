@@ -113,11 +113,31 @@ function hasCTA(section) { return CTA_KEYWORDS.some(function(kw) { return sectio
 function extractMetaValue(headerLines, field) {
   for (var i = 0; i < headerLines.length; i++) {
     var normalized = headerLines[i].replace(/\s+/g, " ");
+    var noSpace = headerLines[i].replace(/\s+/g, "");
     for (var j = 0; j < field.patterns.length; j++) {
-      var idx = normalized.indexOf(field.patterns[j]);
+      var pat = field.patterns[j];
+      var patNoSpace = pat.replace(/\s+/g, "");
+      // 1) \uC6D0\uBCF8\uC5D0\uC11C \uCC3E\uAE30
+      var idx = normalized.indexOf(pat);
       if (idx !== -1) {
-        var after = normalized.slice(idx + field.patterns[j].length).replace(/^[\s::\-\u2013\u2014|]+/, "").trim();
+        var after = normalized.slice(idx + pat.length).replace(/^[\s::\-\u2013\u2014|]+/, "").trim();
         return after || normalized.trim();
+      }
+      // 2) \uACF5\uBC31 \uC81C\uAC70\uD6C4 \uCC3E\uAE30 (\uC8FC    \uC81C \uAC19\uC740 \uACBD\uC6B0)
+      var idxNoSpace = noSpace.indexOf(patNoSpace);
+      if (idxNoSpace !== -1) {
+        var afterNoSpace = noSpace.slice(idxNoSpace + patNoSpace.length).replace(/^[::\-\u2013\u2014|]+/, "").trim();
+        // \uC6D0\uBCF8\uC5D0\uC11C \uD0A4\uC6CC\uB4DC \uB4A4 \uAC12\uC744 \uCD94\uCD9C
+        var lineAfterKeyword = normalized.replace(/\s+/g, "");
+        var rest = lineAfterKeyword.slice(idxNoSpace + patNoSpace.length).replace(/^[::\-\u2013\u2014|]+/, "").trim();
+        if (rest) return rest;
+        // \uACF5\uBC31 \uD3EC\uD568 \uBC84\uC804\uC5D0\uC11C \uB2E4\uC2DC \uCD94\uCD9C
+        var colonIdx = normalized.search(/[::\uFF1A]/);
+        if (colonIdx !== -1) {
+          var afterColon = normalized.slice(colonIdx + 1).trim();
+          if (afterColon) return afterColon;
+        }
+        return normalized.trim();
       }
     }
   }
