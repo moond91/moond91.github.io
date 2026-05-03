@@ -112,8 +112,9 @@ function hasCTA(section) { return CTA_KEYWORDS.some(function(kw) { return sectio
 
 function extractMetaValue(headerLines, field) {
   for (var i = 0; i < headerLines.length; i++) {
-    var normalized = headerLines[i].replace(/\s+/g, " ");
-    var noSpace = headerLines[i].replace(/\s+/g, "");
+    var clean = headerLines[i].replace(/\u200B/g, "").replace(/\u00A0/g, " ").replace(/\uFEFF/g, "");
+    var normalized = clean.replace(/\s+/g, " ");
+    var noSpace = clean.replace(/\s+/g, "");
     for (var j = 0; j < field.patterns.length; j++) {
       var pat = field.patterns[j];
       var patNoSpace = pat.replace(/\s+/g, "");
@@ -198,7 +199,8 @@ function analyzeScript(text, config, category) {
   }
 
   // \uC0C1\uB2E8 \uBA54\uD0C0
-  var headerLines = text.split("\n").slice(0, 20);
+  var cleanText = text.replace(/^\uFEFF/, "").replace(/\u200B/g, "").replace(/\u00A0/g, " ");
+  var headerLines = cleanText.split("\n").slice(0, 30);
   var headerText = headerLines.join("\n");
   var metaPresent = {};
   var metaValues = {};
